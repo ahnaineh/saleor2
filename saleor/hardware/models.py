@@ -5,7 +5,7 @@ from django.utils import timezone
 class HardwareIdentification(models.Model):
     """Model for storing hardware identification records."""
 
-    image = models.ImageField(upload_to="hardware_identifications")
+    image = models.ImageField(upload_to="hw")
     result = models.TextField()
     created_at = models.DateTimeField(default=timezone.now)
 

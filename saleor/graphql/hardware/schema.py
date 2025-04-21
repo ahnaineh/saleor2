@@ -123,7 +123,7 @@ class IdentifyHardwareImage(BaseMutation):
     class Meta:
         description = "Identify hardware from an uploaded image."
         doc_category = DOC_CATEGORY_PRODUCTS
-        permissions = (HardwarePermissions.CHAT,)
+        # permissions = (HardwarePermissions.CHAT,)
         error_type_class = HardwareError
         error_type_field = "hardware_errors"
 
@@ -131,10 +131,8 @@ class IdentifyHardwareImage(BaseMutation):
     def perform_mutation(cls, _root, info, /, *, image):
         # Save the uploaded file
         image_file = info.context.FILES[image]
-        image_name = f"hardware_identification_{uuid.uuid4()}_{image_file.name}"
-        path = default_storage.save(
-            f"hardware_identifications/{image_name}", ContentFile(image_file.read())
-        )
+        image_name = f"{uuid.uuid4()}_{image_file.name}"
+        path = default_storage.save(f"hw/{image_name}", ContentFile(image_file.read()))
 
         # Get the full path to the saved file
         full_path = default_storage.path(path)
@@ -224,16 +222,16 @@ class FindSimilarProducts(BaseMutation):
     class Meta:
         description = "Find similar products based on an uploaded hardware image."
         doc_category = DOC_CATEGORY_PRODUCTS
-        permissions = (HardwarePermissions.CHAT,)
+        # permissions = (HardwarePermissions.CHAT,)
         error_type_class = HardwareError
         error_type_field = "hardware_errors"
 
     @classmethod
     def perform_mutation(cls, _root, info, /, *, image, input):
         image_file = info.context.FILES[image]
-        image_name = f"product_search_{uuid.uuid4()}_{image_file.name}"
+        image_name = f"{uuid.uuid4()}.{image_file.name.split('.')[-1]}"
         path = default_storage.save(
-            f"product_similarity_searches/{image_name}", ContentFile(image_file.read())
+            f"pss/{image_name}", ContentFile(image_file.read())
         )
 
         # Get the full path to the saved file
@@ -243,7 +241,7 @@ class FindSimilarProducts(BaseMutation):
         max_results = input.get("max_results", 3)
 
         # Get products from the database
-        products_query = Product.objects.filter(is_published=True)
+        products_query = Product.objects.all()
 
         if category_id:
             products_query = products_query.filter(category_id=category_id)
